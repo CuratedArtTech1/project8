@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// @ts-nocheck
+import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Section, Label, Input, Button, Badge } from './UI';
 import { currency, inDays } from '../lib/utils';

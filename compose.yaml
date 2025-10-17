@@ -1,0 +1,6 @@
+services:
+  project8:
+    image: project8
+    build:
+      context: .
+      dockerfile: ./Dockerfile
