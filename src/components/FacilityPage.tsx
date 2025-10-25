@@ -40,9 +40,11 @@ export const FacilityPage: React.FC<FacilityPageProps> = ({
   const [lenderPayments, setLenderPayments] = useState<LenderPayment[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const [facilityRes, loansRes, borrowersRes, transactionsRes, facilityTxRes, transfersRes, historyRes, paymentsRes, settingsRes] = await Promise.all([
         supabase.from('lender_facilities').select('*').eq('id', facilityId).single(),
@@ -56,6 +58,28 @@ export const FacilityPage: React.FC<FacilityPageProps> = ({
         supabase.from('settings').select('*').limit(1).single(),
       ]);
 
+      const responses = [
+        facilityRes,
+        loansRes,
+        borrowersRes,
+        transactionsRes,
+        facilityTxRes,
+        transfersRes,
+        historyRes,
+        paymentsRes,
+        settingsRes,
+      ];
+
+      const fetchErrors = responses
+        .map((res) => 'error' in res ? res.error : null)
+        .filter((e): e is NonNullable<typeof e> => Boolean(e));
+
+      if (fetchErrors.length > 0) {
+        const uniqueMessages = Array.from(new Set(fetchErrors.map((e) => e?.message || 'Unknown error'))).join(' | ');
+        setError(uniqueMessages || 'Failed to load facility data.');
+        console.error('Error loading facility data:', fetchErrors);
+      }
+
       if (facilityRes.data) setFacility(facilityRes.data);
       if (loansRes.data) setLoans(loansRes.data);
       if (borrowersRes.data) setBorrowers(borrowersRes.data);
@@ -67,6 +91,7 @@ export const FacilityPage: React.FC<FacilityPageProps> = ({
       if (settingsRes.data) setSettings(settingsRes.data);
     } catch (error) {
       console.error('Error loading facility data:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load facility data.');
     } finally {
       setLoading(false);
     }
@@ -635,6 +660,20 @@ export const FacilityPage: React.FC<FacilityPageProps> = ({
 
   if (loading) {
     return <div className="p-8 text-center">Loading facility...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-gray-50 p-6 text-center space-y-4">
+        <div className="max-w-md space-y-3">
+          <h2 className="text-lg font-semibold text-red-600">Unable to load facility</h2>
+          <p className="text-gray-700 text-sm">{error}</p>
+        </div>
+        <Button variant="outline" onClick={onBack}>
+          Back to Dashboard
+        </Button>
+      </div>
+    );
   }
 
   if (!facility) {

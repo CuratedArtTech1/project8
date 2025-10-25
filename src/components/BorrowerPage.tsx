@@ -44,6 +44,7 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
   const [settings, setSettings] = useState<Settings | null>(null);
   const [rateChanges, setRateChanges] = useState<InterestRateChange[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [changingRateLoanId, setChangingRateLoanId] = useState<string | null>(null);
   const [changingFrequencyLoanId, setChangingFrequencyLoanId] = useState<string | null>(null);
   const [newRateType, setNewRateType] = useState<'fixed' | 'floating'>('floating');
@@ -75,6 +76,7 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
 
   const loadData = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const [borrowerRes, loansRes, artworksRes, transactionsRes, documentsRes, coiRes, loanArtworksRes, facilitiesRes, settingsRes, rateChangesRes] = await Promise.all([
         supabase.from('borrowers').select('*').eq('id', borrowerId).single(),
@@ -89,6 +91,29 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
         supabase.from('interest_rate_changes').select('*').order('effective_date', { ascending: false }),
       ]);
 
+      const responses = [
+        borrowerRes,
+        loansRes,
+        artworksRes,
+        transactionsRes,
+        documentsRes,
+        coiRes,
+        loanArtworksRes,
+        facilitiesRes,
+        settingsRes,
+        rateChangesRes,
+      ];
+
+      const fetchErrors = responses
+        .map((res) => 'error' in res ? res.error : null)
+        .filter((e): e is NonNullable<typeof e> => Boolean(e));
+
+      if (fetchErrors.length > 0) {
+        const uniqueMessages = Array.from(new Set(fetchErrors.map((e) => e?.message || 'Unknown error'))).join(' | ');
+        setError(uniqueMessages || 'Failed to load borrower data.');
+        console.error('Error loading borrower data:', fetchErrors);
+      }
+
       if (borrowerRes.data) setBorrower(borrowerRes.data);
       if (loansRes.data) setLoans(loansRes.data);
       if (artworksRes.data) setArtworks(artworksRes.data);
@@ -101,6 +126,7 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
       if (rateChangesRes.data) setRateChanges(rateChangesRes.data);
     } catch (error) {
       console.error('Error loading borrower data:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load borrower data.');
     } finally {
       setLoading(false);
     }
@@ -1122,6 +1148,20 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
     return (
       <div className="min-h-screen grid place-items-center bg-gray-50">
         <p className="text-gray-600">Loading...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-gray-50 p-6 text-center space-y-4">
+        <div className="max-w-md space-y-3">
+          <h2 className="text-lg font-semibold text-red-600">Unable to load borrower</h2>
+          <p className="text-gray-700 text-sm">{error}</p>
+        </div>
+        <Button variant="outline" onClick={onBack}>
+          Back to Dashboard
+        </Button>
       </div>
     );
   }
