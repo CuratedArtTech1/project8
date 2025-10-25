@@ -854,9 +854,6 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
 
       doc.setFont('helvetica', 'normal');
 
-      let runningPrincipal = 0;
-      let runningIntFees = 0;
-
       allTxs.forEach((tx) => {
         if (y > 280) {
           doc.addPage();
@@ -872,12 +869,6 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
                            tx.type === 'interest_payment' ? 'Int Paid' :
                            tx.type === 'fee_payment' ? 'Fee Paid' :
                            tx.type.charAt(0).toUpperCase() + tx.type.slice(1);
-
-        // Calculate running totals
-        if (tx.type === 'advance') runningPrincipal += Number(tx.amount);
-        if (tx.type === 'repayment') runningPrincipal -= Number(tx.amount);
-        if (tx.type === 'interest_due' || tx.type === 'fee') runningIntFees += Number(tx.amount);
-        if (tx.type === 'interest_payment' || tx.type === 'fee_payment') runningIntFees -= Number(tx.amount);
 
         doc.text(tx.date, 14, y);
         doc.text(loanName.slice(0, 14), 38, y);
