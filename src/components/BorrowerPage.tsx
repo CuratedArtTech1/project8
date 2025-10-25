@@ -106,7 +106,7 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
 
       const fetchErrors = responses
         .map((res) => 'error' in res ? res.error : null)
-        .filter((e): e is NonNullable<typeof e> => Boolean(e));
+        .filter((e) => e !== null);
 
       if (fetchErrors.length > 0) {
         const uniqueMessages = Array.from(new Set(fetchErrors.map((e) => e?.message || 'Unknown error'))).join(' | ');
