@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';

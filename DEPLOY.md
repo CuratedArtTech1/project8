@@ -1,6 +1,67 @@
 # Platform-Specific Deployment Guide
 # CCG Art Loan System
 
+## ✅ Recommended Supabase + Vercel Workflow
+
+Follow this path if you want automated deploys to Vercel with Supabase as the backend and continuous uptime checks.
+
+### 1. Provision Supabase
+1. Install the Supabase CLI: `npm install -g supabase`
+2. Authenticate: `supabase login` (requires a Supabase access token)
+3. Create a new project in the Supabase dashboard and note the **Project URL**, **anon key**, **service role key**, and **project reference**
+4. Link the local repo to the project:
+   ```bash
+   supabase link --project-ref your-project-ref
+   ```
+5. Push the database schema and security policies:
+   ```bash
+   supabase db push
+   ```
+6. Deploy the edge functions (requires the service role key to be configured in the Supabase dashboard under **Project Settings → Functions → Environment Variables**):
+   ```bash
+   supabase functions deploy extract-document-data --no-verify-jwt
+   supabase functions deploy manage-users
+   supabase functions deploy parse-artwork-factsheet --no-verify-jwt
+   supabase functions deploy send-statement-email
+   ```
+7. In **Project Settings → Functions → Environment Variables** add the secrets required by the edge functions:
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `ANTHROPIC_API_KEY` (for document parsing)
+   - `RESEND_API_KEY` (for statement delivery)
+
+### 2. Configure Local Environment
+Create a `.env` file (copy `.env.example`) and set:
+```
+VITE_SUPABASE_URL=https://<project-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon-key>
+```
+
+### 3. Set Up Vercel
+1. Import the repository into Vercel (or run `vercel` from the CLI once)
+2. In **Project Settings → Environment Variables** add:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - Any organization-specific values you need (for example `VITE_ORG_NAME`)
+3. Trigger an initial deployment from your local machine (`vercel --prod`) or push to `main`
+
+### 4. Configure GitHub Actions
+Add the following repository secrets so `.github/workflows/deploy.yml` can promote builds automatically:
+| Secret | Description |
+| ------ | ----------- |
+| `VERCEL_TOKEN` | Personal or team deployment token |
+| `VERCEL_ORG_ID` | Vercel organization ID (from Project Settings → General) |
+| `VERCEL_PROJECT_ID` | Vercel project ID |
+| `VITE_SUPABASE_URL` | Supabase project URL for build-time |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon key for build-time |
+
+Once the secrets are in place, every push to `main` will build and deploy using the workflow.
+
+### 5. Enable Uptime Monitoring
+Set the `UPTIME_MONITOR_URL` secret to your production URL (for example `https://artloan-yourorg.vercel.app`).  
+The scheduled workflow in `.github/workflows/uptime-monitor.yml` will ping the site every 10 minutes and flag any outage via GitHub Actions alerts.
+
+---
+
 ## 🚀 Quick Deploy Commands
 
 ### Netlify

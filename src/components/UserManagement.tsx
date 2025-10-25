@@ -43,7 +43,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ onBack }) => {
         console.error('Error loading users:', result);
         alert(`Failed to load users: ${result.error}`);
       } else if (result.users) {
-        setUsers(result.users.map((u: any) => ({
+        setUsers(result.users.map((u: { id: string; email?: string; created_at: string; last_sign_in_at?: string }) => ({
           id: u.id,
           email: u.email || 'No email',
           created_at: u.created_at,

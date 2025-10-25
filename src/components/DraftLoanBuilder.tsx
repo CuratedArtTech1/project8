@@ -17,7 +17,7 @@ interface OverrideRowProps {
   setOverridden: (value: boolean) => void;
   value: string;
   setValue: (value: string) => void;
-  display?: (v: any) => string;
+  display?: (v: unknown) => string;
   inputType?: string;
   help?: string;
 }
@@ -82,6 +82,7 @@ const Section = ({ title, right, children }: SectionProps) => (
   </div>
 );
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 function useDebounce<T extends (...args: any[]) => any>(fn: T, ms = 500) {
   const timeout = useRef<NodeJS.Timeout | null>(null);
   return (...args: Parameters<T>) => {

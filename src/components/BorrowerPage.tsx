@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { Section, Button, Badge } from './UI';
 import { currency, todayISO, daysBetween, inDays } from '../lib/utils';
@@ -73,7 +73,7 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
   const [txDate, setTxDate] = useState(todayISO());
   const [txNote, setTxNote] = useState('');
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [borrowerRes, loansRes, artworksRes, transactionsRes, documentsRes, coiRes, loanArtworksRes, facilitiesRes, settingsRes, rateChangesRes] = await Promise.all([
@@ -104,7 +104,7 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
     } finally {
       setLoading(false);
     }
-  };
+  }, [borrowerId]);
 
   useEffect(() => {
     loadData();
@@ -1086,7 +1086,7 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
 
       if (rateChangeError) throw rateChangeError;
 
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         rate_type: newRateType,
         interest_rate_bps: newRateBps,
         interest_rate_override_bps: newRateBps,
@@ -1113,8 +1113,8 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
       setNewFixedApr('');
       setRateChangeReason('');
       loadData();
-    } catch (error: any) {
-      alert(`Error updating rate: ${error.message}`);
+    } catch (error: unknown) {
+      alert(`Error updating rate: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -1409,7 +1409,7 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
                   <select
                     className="w-full rounded-xl border px-3 py-2 text-sm mt-1"
                     value={txType}
-                    onChange={(e) => setTxType(e.target.value as any)}
+                    onChange={(e) => setTxType(e.target.value as 'advance' | 'repayment' | 'interest_due' | 'interest_payment' | 'fee' | 'fee_payment')}
                     required
                   >
                     <option value="advance">Advance (Loan to Borrower)</option>

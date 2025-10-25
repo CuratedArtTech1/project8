@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { Section, Button, Badge } from './UI';
 import { currency, todayISO } from '../lib/utils';
@@ -41,7 +41,7 @@ export const FacilityPage: React.FC<FacilityPageProps> = ({
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [facilityRes, loansRes, borrowersRes, transactionsRes, facilityTxRes, transfersRes, historyRes, paymentsRes, settingsRes] = await Promise.all([
@@ -70,7 +70,7 @@ export const FacilityPage: React.FC<FacilityPageProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [facilityId]);
 
   useEffect(() => {
     loadData();

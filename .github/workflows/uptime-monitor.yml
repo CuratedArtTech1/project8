@@ -1,0 +1,47 @@
+name: Uptime Monitor
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  MONITOR_URL: ${{ secrets.UPTIME_MONITOR_URL }}
+
+jobs:
+  ping:
+    name: Check Production Availability
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate monitor URL
+        run: |
+          if [ -z "${MONITOR_URL}" ]; then
+            echo "::error::The UPTIME_MONITOR_URL secret is not set."
+            exit 1
+          fi
+
+      - name: Probe deployment
+        id: probe
+        run: |
+          read STATUS_CODE RESPONSE_TIME <<EOF
+          $(curl -Lsf -o /tmp/uptime-body.txt -w "%{http_code} %{time_total}" --max-time 15 "${MONITOR_URL}")
+          EOF
+          echo "status=${STATUS_CODE}" >> "$GITHUB_OUTPUT"
+          echo "latency=${RESPONSE_TIME}" >> "$GITHUB_OUTPUT"
+          echo "HTTP status: ${STATUS_CODE}"
+          echo "Latency: ${RESPONSE_TIME}s"
+          if [ "${STATUS_CODE}" -lt 200 ] || [ "${STATUS_CODE}" -ge 400 ]; then
+            echo "::error::Unhealthy response from ${MONITOR_URL} (status ${STATUS_CODE})"
+            echo "----- Response body (first 50 lines) -----"
+            head -n 50 /tmp/uptime-body.txt
+            exit 1
+          fi
+
+      - name: Emit metrics summary
+        run: |
+          echo "✅ Uptime check succeeded"
+          echo "HTTP status: ${{ steps.probe.outputs.status }}"
+          echo "Latency: ${{ steps.probe.outputs.latency }}s"

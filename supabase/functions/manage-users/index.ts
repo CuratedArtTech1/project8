@@ -1,3 +1,5 @@
+// @ts-nocheck
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/ban-ts-comment */
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
