@@ -8,7 +8,11 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "create:org": "./scripts/create-org.sh",
+    "deploy:org": "./scripts/deploy-org.sh",
+    "list:orgs": "ls -la organizations/ 2>/dev/null || echo 'No organizations created yet. Run: npm run create:org'",
+    "demo:org": "./scripts/create-org.sh 'Demo Art Gallery' 'demo-gallery' && echo 'Demo organization created! Check organizations/demo-gallery/'"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",

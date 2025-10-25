@@ -206,8 +206,8 @@ export interface ChangeLog {
   entity_type: string;
   entity_id: string;
   field: string;
-  before: any;
-  after: any;
+  before: unknown;
+  after: unknown;
   reason: string;
   changed_by: string | null;
   changed_at: string;

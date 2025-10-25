@@ -108,7 +108,7 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
 
   useEffect(() => {
     loadData();
-  }, [borrowerId]);
+  }, [borrowerId, loadData]);
 
   const loanBalance = (loanId: string): number => {
     const advances = transactions

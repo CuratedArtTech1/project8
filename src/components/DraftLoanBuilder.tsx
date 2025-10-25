@@ -138,7 +138,7 @@ export default function DraftLoanBuilder() {
     }
     loadArtworks(borrowerId);
     checkForExistingDraft(borrowerId);
-  }, [borrowerId]);
+  }, [borrowerId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkForExistingDraft = async (borrowerId: string) => {
     const { data } = await supabase
@@ -165,7 +165,7 @@ export default function DraftLoanBuilder() {
       setNotes(''); // loan.notes property doesn't exist in current schema
       setInterestFrequency(loan.interest_frequency || 'monthly');
     }
-  }, [loan]);
+  }, [loan]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadData = async () => {
     const { data: settingsData } = await supabase.from('settings').select('*').limit(1).single();
@@ -687,6 +687,8 @@ export default function DraftLoanBuilder() {
     origFeePct,
     overrideReason,
     notes,
+    debouncedPersist,
+    loan,
   ]);
 
   return (

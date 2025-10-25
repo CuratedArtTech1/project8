@@ -74,7 +74,7 @@ export const FacilityPage: React.FC<FacilityPageProps> = ({
 
   useEffect(() => {
     loadData();
-  }, [facilityId]);
+  }, [facilityId, loadData]);
 
   const loanBalance = (loanId: string): number => {
     const advances = transactions
