@@ -15,6 +15,7 @@ jobs:
   ping:
     name: Check Production Availability
     runs-on: ubuntu-latest
+    # Only run if monitor URL is configured
     steps:
       - name: Validate monitor URL
         run: |
