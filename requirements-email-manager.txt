@@ -1,0 +1,9 @@
+# CCG Email Manager - Python Dependencies
+# Most functionality uses Python standard library (imaplib, smtplib, email, ssl)
+
+# Optional: For Streamlit secrets integration
+streamlit>=1.28.0
+
+# Development and testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
