@@ -95,7 +95,7 @@ with CCGEmailManager(config) as manager:
 with CCGEmailManager(config) as manager:
     success = manager.send_email(
         to_address="client@example.com",
-        subject="Loan Statement - October 2025",
+        subject="Loan Statement - {Month} {Year}",
         body="Please find your monthly loan statement attached.",
         html_body="<h2>Monthly Statement</h2><p>Statement attached.</p>",
         attachments=[("statement.pdf", pdf_bytes)]
@@ -112,8 +112,8 @@ with CCGEmailManager(config) as manager:
     # Find unread emails with specific subject
     emails = manager.search_emails('UNSEEN SUBJECT "loan"')
     
-    # Find emails from last week
-    emails = manager.search_emails('SINCE 21-Oct-2025')
+    # Find emails from a specific date
+    emails = manager.search_emails('SINCE 1-Jan-2024')
 ```
 
 ## 🔐 Security Best Practices
@@ -156,12 +156,13 @@ with CCGEmailManager(config) as manager:
 
 ```python
 from ccg_email_manager_secure import CCGEmailManager, load_config_from_streamlit
-import jspdf  # Your existing PDF library
+# Note: For PDF generation in Python, use reportlab, fpdf2, or weasyprint
+# The CCG system uses jsPDF in the browser for client-side PDF generation
 
 # Load config from Streamlit secrets
 config = load_config_from_streamlit()
 
-# Generate PDF statement (using your existing code)
+# Generate PDF statement (using your existing PDF generation code)
 pdf_content = generate_loan_statement(borrower_id, loan_id)
 
 # Send email
