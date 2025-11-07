@@ -74,16 +74,16 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
   const [txDate, setTxDate] = useState(todayISO());
   const [txNote, setTxNote] = useState('');
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (id: string) => {
     setLoading(true);
     setError(null);
     try {
       const [borrowerRes, loansRes, artworksRes, transactionsRes, documentsRes, coiRes, loanArtworksRes, facilitiesRes, settingsRes, rateChangesRes] = await Promise.all([
-        supabase.from('borrowers').select('*').eq('id', borrowerId).single(),
-        supabase.from('loans').select('*').eq('borrower_id', borrowerId),
+        supabase.from('borrowers').select('*').eq('id', id).single(),
+        supabase.from('loans').select('*').eq('borrower_id', id),
         supabase.from('artworks').select('*'),
         supabase.from('transactions').select('*'),
-        supabase.from('documents').select('*').or(`borrower_id.eq.${borrowerId}`),
+        supabase.from('documents').select('*').or(`borrower_id.eq.${id}`),
         supabase.from('coi_records').select('*'),
         supabase.from('loan_artworks').select('*'),
         supabase.from('lender_facilities').select('*'),
@@ -130,11 +130,11 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
     } finally {
       setLoading(false);
     }
-  }, [borrowerId]);
+  }, []);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    loadData(borrowerId);
+  }, [borrowerId, loadData]);
 
   const loanBalance = (loanId: string): number => {
     const advances = transactions
@@ -376,7 +376,7 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
       if (loanError) throw loanError;
 
       alert('Interest due posted successfully');
-      loadData();
+      loadData(borrowerId);
     } catch (error) {
       console.error('Error posting interest due:', error);
       alert('Failed to post interest due');
@@ -413,7 +413,7 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
       if (error) throw error;
 
       alert('Interest payment recorded successfully');
-      loadData();
+      loadData(borrowerId);
     } catch (error) {
       console.error('Error recording interest payment:', error);
       alert('Failed to record interest payment');
@@ -983,7 +983,7 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
     setCoiExpires('');
     setCoiLimitAmount('');
     setSelectedArtworkId('');
-    loadData();
+    loadData(borrowerId);
   };
 
   const handleUpdateUCC = async () => {
@@ -1014,7 +1014,7 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
     setUccContinuationDue('');
     setUccCollateralDesc('');
     setSelectedLoanId('');
-    loadData();
+    loadData(borrowerId);
   };
 
   const handleAddTransaction = async () => {
@@ -1041,7 +1041,7 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
     setTxAmount('');
     setTxNote('');
     setSelectedLoanId('');
-    loadData();
+    loadData(borrowerId);
   };
 
   const handleChangeFrequency = async (loanId: string, newFrequency: 'monthly' | 'quarterly') => {
@@ -1055,7 +1055,7 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
 
       alert(`Interest frequency updated to ${newFrequency}`);
       setChangingFrequencyLoanId(null);
-      loadData();
+      loadData(borrowerId);
     } catch (error) {
       console.error('Error changing interest frequency:', error);
       alert('Failed to change interest frequency');
@@ -1129,7 +1129,7 @@ export const BorrowerPage: React.FC<BorrowerPageProps> = ({ borrowerId, onBack, 
       setNewSpread('');
       setNewFixedApr('');
       setRateChangeReason('');
-      loadData();
+      loadData(borrowerId);
     } catch (error: unknown) {
       alert(`Error updating rate: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
