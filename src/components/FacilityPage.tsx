@@ -42,19 +42,19 @@ export const FacilityPage: React.FC<FacilityPageProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (id: string) => {
     setLoading(true);
     setError(null);
     try {
       const [facilityRes, loansRes, borrowersRes, transactionsRes, facilityTxRes, transfersRes, historyRes, paymentsRes, settingsRes] = await Promise.all([
-        supabase.from('lender_facilities').select('*').eq('id', facilityId).single(),
-        supabase.from('loans').select('*').eq('facility_id', facilityId),
+        supabase.from('lender_facilities').select('*').eq('id', id).single(),
+        supabase.from('loans').select('*').eq('facility_id', id),
         supabase.from('borrowers').select('*'),
         supabase.from('transactions').select('*'),
-        supabase.from('facility_transactions').select('*').eq('facility_id', facilityId).order('date', { ascending: false }),
-        supabase.from('loan_transfers').select('*').or(`from_facility_id.eq.${facilityId},to_facility_id.eq.${facilityId}`).order('transfer_date', { ascending: false }),
-        supabase.from('facility_history').select('*').eq('facility_id', facilityId).order('change_date', { ascending: false }),
-        supabase.from('lender_payments').select('*').eq('facility_id', facilityId).order('payment_date', { ascending: false }),
+        supabase.from('facility_transactions').select('*').eq('facility_id', id).order('date', { ascending: false }),
+        supabase.from('loan_transfers').select('*').or(`from_facility_id.eq.${id},to_facility_id.eq.${id}`).order('transfer_date', { ascending: false }),
+        supabase.from('facility_history').select('*').eq('facility_id', id).order('change_date', { ascending: false }),
+        supabase.from('lender_payments').select('*').eq('facility_id', id).order('payment_date', { ascending: false }),
         supabase.from('settings').select('*').limit(1).single(),
       ]);
 
@@ -95,11 +95,11 @@ export const FacilityPage: React.FC<FacilityPageProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [facilityId]);
+  }, []);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    loadData(facilityId);
+  }, [facilityId, loadData]);
 
   const loanBalance = (loanId: string): number => {
     const advances = transactions
@@ -1043,7 +1043,7 @@ export const FacilityPage: React.FC<FacilityPageProps> = ({
           </div>
 
           {/* <div className="mb-4">
-            <FacilityTransactionForm facilityId={facilityId} onSuccess={loadData} />
+            <FacilityTransactionForm facilityId={facilityId} onSuccess={() => loadData(facilityId)} />
           </div> */}
 
           {facilityTransactions.length === 0 ? (
@@ -1098,7 +1098,7 @@ export const FacilityPage: React.FC<FacilityPageProps> = ({
           <LenderPaymentForm
             facilityId={facilityId}
             borrowers={borrowers.filter(b => loans.some(l => l.borrower_id === b.id))}
-            onSuccess={loadData}
+            onSuccess={() => loadData(facilityId)}
           />
 
           <div className="mt-6">
